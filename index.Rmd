@@ -1,0 +1,229 @@
+---
+pagetitle: EC3133 Nonlinear regression functions
+output: 
+  revealjs::revealjs_presentation:
+    incremental: false
+    theme: solarized
+    self_contained: false
+    # reveal_plugins: ["menu","notes","chalkboard"]
+    reveal_plugins: ["menu"]
+    highlight: pygments
+    center: true
+    transition: none
+    background_transition: none 
+    reveal_options:
+      # chalkboard:
+      #   theme: whiteboard
+      #   toggleNotesButton: true
+      #   toggleChalkboardButton: true
+      menu:
+        numbers: true
+      slideNumber: true
+      previewLinks: false
+    fig_caption: true
+    pandoc_args:
+    - --indented-code-classes
+    - lineNumbers
+    css: mystyle.css
+    
+--- 
+
+<section>
+
+<h1>Nonlinear regression functions</h1>
+
+Based on Stock and Watson, ch. 8
+
+<br>
+
+<h2>[Jesper Bagger](mailto:jesper.bagger@rhul.ac.uk)</h2>
+
+<h3>EC3133 | Royal Holloway | 2020/21</h3>
+
+</section>
+
+
+```{r results='asis', echo=FALSE, include=FALSE}
+library(AER) # Load Applied Econometrics with R library
+library(lmtest) # Load lmtest library 
+library(parameters) # Load parameters library 
+data(CASchools) # Load CASchools data
+# Generate a couple of useful variables
+CASchools$STR <- CASchools$students/CASchools$teachers  # Student-teacher ratio
+CASchools$Score <- (CASchools$read + CASchools$math)/2  # Student test score
+```
+
+# Nonlinear regression functions
+
+## Test scores and district income
+
+
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# Scatter plot of Score against STR
+plot(CASchools$income,CASchools$Score,
+     xlab = "District income ($1,000)", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "blue", # Make the data points blue
+     xlim = c(0, 60), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+```
+
+## Test scores and district income
+
+$$Score_i = 625 + 1.88 Income_i + \hat{u}_i$$
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# Estimate simple linear regression Score = b0 + b1*income + u
+lm1 <- lm(Score ~ income, data = CASchools) # Assign OLS output to to lm1 list
+# Scatter plot of Score against STR
+plot(CASchools$income,CASchools$Score,
+     xlab = "District income ($1,000)", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "blue", # Make the data points blue
+     xlim = c(0, 60), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+# Add simple linear sample regression function
+abline(lm1,
+       lwd = 3,
+       col = "blue")
+```
+
+## Nonlinear test score-income relationship 
+
+- At low income levels, additional income increases test scores by a lot, but at high income levels, the effect of income on test scores is very modest
+
+- A regression function linear in $Income$ fail to capture this phenomenon; need **nonlinear regression function**
+
+  - Effect can vary with the regressor itself
+  
+  - Effect can vary with another regressor
+
+# Polynomial regression functions
+
+## A polynomial regression function
+
+- Consider the polynomial (quadratic) regression model
+
+  <div class="box">
+  $$Score_i = \underset{E(Score_i|Income_i)}{\underbrace{\beta_0 + \beta_1 Income_i + \beta_2 Income_i^2}} + u_i$$
+  </div>
+  
+- The polynomial regression model is **linear** in the parameters $\beta_0$, $\beta_1$, and $\beta_2$, but **nonlinear** in $Income$
+
+## Non-constant income effects
+
+- The change in $Score_i$ following small change in $Income_i$ is:
+
+  <div class="box">
+  $$\lim_{\Delta Income_i \rightarrow 0}\frac{\Delta Score_i}{\Delta Income_i} = \beta_1 + 2 \beta_2 Income_i$$
+  </div>
+  
+- The effect of $Income$ on $Score$ varies with $Income$ in the polynomial regression model
+
+## Estimating the polynomial regression model
+
+```{r, echo=TRUE, eval=FALSE, error=FALSE, warning=FALSE}
+# Creating income^2
+CASchools$income2 <- CASchools$income^2
+# Estimate simple linear regression, assign to lm1
+lm1 <- lm(Score ~ income, data = CASchools)
+parameters(lm1)
+# Estimate polynomial regression, assign to lm2
+lm2 <- lm(Score ~ income + income2, data = CASchools) 
+parameters(lm2)
+```
+
+
+## linear and polynomial regression model parameters
+
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# Creating income^2
+CASchools$income2 <- CASchools$income^2
+# Estimate simple linear regression, assign to lm1
+lm1 <- lm(Score ~ income, data = CASchools)
+parameters(lm1)
+# Estimate polynomial regression, assign to lm2
+lm2 <- lm(Score ~ income + income2, data = CASchools) 
+parameters(lm2)
+```
+
+
+## Test scores and district income
+
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# Define estimated polynomial regression function
+nonlinregfct <- function(x){lm2$coefficients["(Intercept)"] +
+                            lm2$coefficients["income"]*x +
+                            lm2$coefficients["income2"]*x^2}
+# Scatter plot of Score against STR
+plot(CASchools$income,CASchools$Score,
+     xlab = "District income ($1,000)", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "blue", # Make the data points blue
+     xlim = c(0, 60), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+# Add simple linear sample regression function
+abline(lm1,
+       lwd = 3,
+       col = "blue")
+curve(nonlinregfct,
+      from = -10, to = 70, # Evaluate in x values from 5 to 35
+      lwd = 3,
+      col = "red",
+      add = TRUE)
+# Add legends to the plot (in the top-right corner)
+legend("topleft", inset = 0.02, 
+       legend = c("Linear model", "Quadratic model"),
+       col = c("blue", "red"), 
+       lwd = 3:3)
+```
+
+# Significance tests with nonlinear regression functions
+
+## Is the effect of income statistically significant?
+
+- How do test whether the effect of income is statistically significant in the polynomial regression model?
+
+  $$H_0: \, \beta_1 = \beta_2 = 0; \quad H_1: \, \beta_1 \neq 0 \text{ or } \beta_2 \neq 0$$
+
+- This is a **joint hypothesis**, which we can test by an $F$-test
+
+## $F$-test in R
+
+```{r, echo=TRUE, eval=FALSE, error=FALSE, warning=FALSE}
+# F-test (heteroskedasticity robust) of H_0: beta_1 = beta_2 = 0
+linearHypothesis(lm2, c("income=0", "income2=0"), white.adjust = "hc1")
+```
+
+## $F$-test in R
+
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# F-test (heteroskedasticity robust) of H_0: beta_1 = beta_2 = 0
+linearHypothesis(lm2, c("income=0", "income2=0"), white.adjust = "hc1")
+```
+
+
+## Is the effect of income linear?
+
+- How do test whether the effect of income is linear in the polynomial regression model?
+
+  $$H_0: \, \beta_2 = 0; \quad H_1: \, \text{ or } \beta_2 \neq 0$$
+
+- This **hypothesis** involves a single restriction, which we can test by an $t$-test
+
+# Summary
+
+## Summary
+
+- Regression models with nonlinear regression functions allow for the effect of a regressor to be non-constant:
+
+  - Effect can vary with the regressor itself
+  
+  - Effect can vary with another regressor
+
+- The polynomial regression model offers a convenient way to introduce nonlinear regression functions where the effect of the regressor varies with the regressor itself
+
+- This can also be achieved using linear-log, log-linear or log-log models (covered in pre-recorded lecture snippets)
+
+- Interaction regressions covered in next week's seminar
+
+
