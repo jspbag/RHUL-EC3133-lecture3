@@ -45,7 +45,6 @@ Based on Stock and Watson, ch. 8
 
 ```{r results='asis', echo=FALSE, include=FALSE}
 library(AER) # Load Applied Econometrics with R library
-library(lmtest) # Load lmtest library 
 library(parameters) # Load parameters library 
 data(CASchools) # Load CASchools data
 # Generate a couple of useful variables
@@ -53,7 +52,6 @@ CASchools$STR <- CASchools$students/CASchools$teachers  # Student-teacher ratio
 CASchools$Score <- (CASchools$read + CASchools$math)/2  # Student test score
 ```
 
-# Nonlinear regression functions
 
 ## Test scores and district income
 
@@ -87,19 +85,13 @@ abline(lm1,
        col = "blue")
 ```
 
-## Nonlinear test score-income relationship 
+<!-- ## Nonlinear test score-income relationship -->
 
-- At low income levels, additional income increases test scores by a lot, but at high income levels, the effect of income on test scores is very modest
+<!-- - At low income levels, additional income increases test scores by a lot, but at high income levels, the effect of income on test scores is very modest -->
 
-- A regression function linear in $Income$ fail to capture this phenomenon; need **nonlinear regression function**
+<!-- - A regression function that is linear in $Income$ cannot capture this phenomenon -->
 
-  - Effect can vary with the regressor itself
-  
-  - Effect can vary with another regressor
-
-# Polynomial regression functions
-
-## A polynomial regression function
+## A polynomial regresssion function
 
 - Consider the polynomial (quadratic) regression model
 
@@ -109,9 +101,9 @@ abline(lm1,
   
 - The polynomial regression model is **linear** in the parameters $\beta_0$, $\beta_1$, and $\beta_2$, but **nonlinear** in $Income$
 
-## Non-constant income effects
+## Non-constant $Income$ effects
 
-- The change in $Score_i$ following small change in $Income_i$ is:
+- The change in $Score_i$ associated w/ a small change in $Income_i$ is:
 
   <div class="box">
   $$\lim_{\Delta Income_i \rightarrow 0}\frac{\Delta Score_i}{\Delta Income_i} = \beta_1 + 2 \beta_2 Income_i$$
@@ -126,10 +118,10 @@ abline(lm1,
 CASchools$income2 <- CASchools$income^2
 # Estimate simple linear regression, assign to lm1
 lm1 <- lm(Score ~ income, data = CASchools)
-parameters(lm1)
+parameters(lm1, robust = TRUE, vcov_type = "HC1")
 # Estimate polynomial regression, assign to lm2
 lm2 <- lm(Score ~ income + income2, data = CASchools) 
-parameters(lm2)
+parameters(lm2, robust = TRUE, vcov_type = "HC1")
 ```
 
 
@@ -140,10 +132,10 @@ parameters(lm2)
 CASchools$income2 <- CASchools$income^2
 # Estimate simple linear regression, assign to lm1
 lm1 <- lm(Score ~ income, data = CASchools)
-parameters(lm1)
+parameters(lm1, robust = TRUE, vcov_type = "HC1")
 # Estimate polynomial regression, assign to lm2
 lm2 <- lm(Score ~ income + income2, data = CASchools) 
-parameters(lm2)
+parameters(lm2, robust = TRUE, vcov_type = "HC1")
 ```
 
 
@@ -170,60 +162,161 @@ curve(nonlinregfct,
       lwd = 3,
       col = "red",
       add = TRUE)
-# Add legends to the plot (in the top-right corner)
-legend("topleft", inset = 0.02, 
-       legend = c("Linear model", "Quadratic model"),
-       col = c("blue", "red"), 
-       lwd = 3:3)
+# Add legends to the plot 
+legend("bottomright", inset = 0.02, 
+       legend=c("Linear", "Quadratic"),
+       col=c("blue", "red"), 
+       lwd=c(3,3))
 ```
 
-# Significance tests with nonlinear regression functions
 
-## Is the effect of income statistically significant?
-
-- How do test whether the effect of income is statistically significant in the polynomial regression model?
-
-  $$H_0: \, \beta_1 = \beta_2 = 0; \quad H_1: \, \beta_1 \neq 0 \text{ or } \beta_2 \neq 0$$
-
-- This is a **joint hypothesis**, which we can test by an $F$-test
-
-## $F$-test in R
+## Test scores and district income
 
 ```{r, echo=TRUE, eval=FALSE, error=FALSE, warning=FALSE}
-# F-test (heteroskedasticity robust) of H_0: beta_1 = beta_2 = 0
-linearHypothesis(lm2, c("income=0", "income2=0"), white.adjust = "hc1")
+# Define estimated polynomial regression function
+nonlinregfct <- function(x){lm2$coefficients["(Intercept)"] +
+                            lm2$coefficients["income"]*x +
+                            lm2$coefficients["income2"]*x^2}
+# Scatter plot of Score against STR
+plot(CASchools$income,CASchools$Score,
+     xlab = "District income ($1,000)", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "blue", # Make the data points blue
+     xlim = c(0, 60), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+# Add simple linear sample regression function
+abline(lm1,
+       lwd = 3,
+       col = "blue")
+curve(nonlinregfct,
+      from = -10, to = 70, # Evaluate in x values from 5 to 35
+      lwd = 3,
+      col = "red",
+      add = TRUE)
+# Add legends to the plot 
+legend("bottomright", inset = 0.02, 
+       legend=c("Linear", "Quadratic"),
+       col=c("blue", "red"), 
+       lwd=c(3,3))
 ```
 
-## $F$-test in R
+## Test scores, student teacher ratio, and district income
+
+$$Score_i = 698.93 - 2.28 STR_i + \hat{u}_i$$
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
+# Creating a few additional useful variables
+CASchools$HigInc <- (CASchools$income >= median(CASchools$income)) # = TRUE if income above median income in sample, = FALSE otherwise
+CASchools$STR.x.HigInc <- CASchools$STR * CASchools$HigInc # Interaction
+# Estimate simple linear regression Score = b0 + b1*income + u
+lm1 <- lm(Score ~ income, data = CASchools) # Assign OLS output to to lm1 list
+lm2 <- lm(Score ~ STR, data = CASchools) # Assign OLS output to to lm1 list
+lm3 <- lm(Score ~ STR + HigInc + STR.x.HigInc, data = CASchools) # Assign OLS output to to lm1 list
+# Scatter plot of Score against STR
+plot(CASchools$STR,CASchools$Score,
+     xlab = "Student-teacher ratio", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "blue", # Make the data points blue
+     xlim = c(10, 30), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+# Add simple linear sample regression function
+abline(lm2,
+       lwd = 3,
+       col = "blue")
+```
+
+## An interaction regresssion function
+
+- Consider the interaction regression model
+
+  <div class="box">
+  \begin{multline}
+  Score_i = \beta_0 + \beta_1 STR_i + \beta_2 HigInc_i \\
+  + \beta_3 (STR_i \times HigInc_i) + u_i
+  \end{multline}
+  </div>
+  
+- The interaction regression model is **linear** in parameters $\beta_0$, $\beta_1$, $\beta_2$, and $\beta_3$, but **nonlinear** in $Income$
+
+## Non-constant $STR$ effect
+
+- The change in $Score_i$ associated w/ a unit change in $STR_i$ is:
+
+  <div class="box">
+  $$\frac{\Delta Score_i}{\Delta STR_i} = \beta_1 + \beta_3 HigInc_i$$
+  </div>
+  
+- The effect of $STR$ on $Score$ varies with $Income$ in the interaction regression model
+
+## Estimating the interaction regression model
+
+```{r, echo=TRUE, eval=FALSE, error=FALSE, warning=FALSE}
+# Creating a few additional useful variables
+CASchools$HigInc <- (CASchools$income >= median(CASchools$income)) # = TRUE if income above median income in sample, = FALSE otherwise
+CASchools$STR.x.HigInc <- CASchools$STR * CASchools$HigInc # Interaction
+# Estimate simple linear regression Score = b0 + b1*income + u
+lm3 <- lm(Score ~ STR + HigInc + STR.x.HigInc, data = CASchools) # Assign OLS output to to lm3 list
+summary(lm3)
+parameters(lm3, robust = TRUE, vcov_type = "HC1")
+```
+
+## Estimating the interaction regression model
 
 ```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE}
-# F-test (heteroskedasticity robust) of H_0: beta_1 = beta_2 = 0
-linearHypothesis(lm2, c("income=0", "income2=0"), white.adjust = "hc1")
+# Creating a few additional useful variables
+CASchools$HigInc <- (CASchools$income >= median(CASchools$income)) # = TRUE if income above median income in sample, = FALSE otherwise
+CASchools$STR.x.HigInc <- CASchools$STR * CASchools$HigInc # Interaction
+# Estimate simple linear regression Score = b0 + b1*income + u
+lm3 <- lm(Score ~ STR + HigInc + STR.x.HigInc, data = CASchools) # Assign OLS output to to lm3 list
+parameters(lm3, robust = TRUE, vcov_type = "HC1")
 ```
 
+## Test scores, student teacher ratio, and district income
 
-## Is the effect of income linear?
-
-- How do test whether the effect of income is linear in the polynomial regression model?
-
-  $$H_0: \, \beta_2 = 0; \quad H_1: \, \text{ or } \beta_2 \neq 0$$
-
-- This **hypothesis** involves a single restriction, which we can test by an $t$-test
+\begin{multline}
+Score_i = 663.89 - 1.01 STR_i + \\
+62.53 HigInc_i-2.17 (STR_i \times HigInc_i)  + \hat{u}_i
+\end{multline}
+```{r, echo=FALSE, eval=TRUE, error=FALSE, warning=FALSE,out.width = "70%"}
+# Scatter plot of Score against STR
+plot(CASchools$STR,CASchools$Score,
+     xlab = "Student-teacher ratio", # Label x-axis
+     ylab = "Test score", # Label y-axis
+     col = "green", # Make the data points blue
+     xlim = c(10, 30), # Range of x-values in plot
+     ylim = c(600, 740)) # Range of y-values in plot
+points(CASchools$STR[!CASchools$HigInc],CASchools$Score[!CASchools$HigInc],
+       lwd = 1.5,
+       col = "red")
+# Add simple linear sample regression function
+abline(lm3$coefficients["(Intercept)"] + lm3$coefficients["HigIncTRUE"],
+       lm3$coefficients["STR"] + lm3$coefficients["STR.x.HigInc"],
+       lwd = 3,
+       col = "green")
+# Add simple linear sample regression function
+abline(lm3$coefficients["(Intercept)"],
+       lm3$coefficients["STR"],
+       lwd = 3,
+       col = "red")
+abline(lm2,
+       lwd = 3,
+       col = "blue")
+# Add legends to the plot 
+legend("topright", inset = 0.02, 
+       legend=c("All", "Above median income", "Below median income"),
+       col=c("blue", "green", "red"), 
+       lwd=c(3,3,3))
+```
 
 # Summary
 
 ## Summary
 
-- Regression models with nonlinear regression functions allow for the effect of a regressor to be non-constant:
+- Nonlinear regression functions allow for non-constant effects of the regressor on the dependent variable
 
-  - Effect can vary with the regressor itself
+  - Polynomial regression model
   
-  - Effect can vary with another regressor
+  - Interaction regression model
+  
+- Failure to capture nonlinear effects may lead the OLS estimator of causal effects to be inconsistent and biased.
 
-- The polynomial regression model offers a convenient way to introduce nonlinear regression functions where the effect of the regressor varies with the regressor itself
-
-- This can also be achieved using linear-log, log-linear or log-log models (covered in pre-recorded lecture snippets)
-
-- Interaction regressions covered in next week's seminar
-
-
+- Possible to test for nonlinear effects.

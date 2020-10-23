@@ -532,25 +532,19 @@ EC3133 | Royal Holloway | 2020/21
 </h3>
 </section>
 </section>
-<section><section id="nonlinear-regression-functions" class="title-slide slide level1"><h1>Nonlinear regression functions</h1></section><section id="test-scores-and-district-income" class="slide level2">
+<section id="test-scores-and-district-income" class="slide level2">
 <h2>Test scores and district income</h2>
 <p><img data-src="index_files/figure-revealjs/unnamed-chunk-2-1.png" /><!-- --></p>
-</section><section id="test-scores-and-district-income-1" class="slide level2">
+</section>
+<section id="test-scores-and-district-income-1" class="slide level2">
 <h2>Test scores and district income</h2>
 <p><span class="math display">\[Score_i = 625 + 1.88 Income_i + \hat{u}_i\]</span> <img data-src="index_files/figure-revealjs/unnamed-chunk-3-1.png" /><!-- --></p>
-</section><section id="nonlinear-test-score-income-relationship" class="slide level2">
-<h2>Nonlinear test score-income relationship</h2>
-<ul>
-<li><p>At low income levels, additional income increases test scores by a lot, but at high income levels, the effect of income on test scores is very modest</p></li>
-<li><p>A regression function linear in <span class="math inline">\(Income\)</span> fail to capture this phenomenon; need <strong>nonlinear regression function</strong></p>
-<ul>
-<li><p>Effect can vary with the regressor itself</p></li>
-<li><p>Effect can vary with another regressor</p></li>
-</ul></li>
-</ul>
-</section></section>
-<section><section id="polynomial-regression-functions" class="title-slide slide level1"><h1>Polynomial regression functions</h1></section><section id="a-polynomial-regression-function" class="slide level2">
-<h2>A polynomial regression function</h2>
+<!-- ## Nonlinear test score-income relationship -->
+<!-- - At low income levels, additional income increases test scores by a lot, but at high income levels, the effect of income on test scores is very modest -->
+<!-- - A regression function that is linear in $Income$ cannot capture this phenomenon -->
+</section>
+<section id="a-polynomial-regresssion-function" class="slide level2">
+<h2>A polynomial regresssion function</h2>
 <ul>
 <li><p>Consider the polynomial (quadratic) regression model</p>
 <div class="box">
@@ -558,88 +552,135 @@ EC3133 | Royal Holloway | 2020/21
 </div></li>
 <li><p>The polynomial regression model is <strong>linear</strong> in the parameters <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, and <span class="math inline">\(\beta_2\)</span>, but <strong>nonlinear</strong> in <span class="math inline">\(Income\)</span></p></li>
 </ul>
-</section><section id="non-constant-income-effects" class="slide level2">
-<h2>Non-constant income effects</h2>
+</section>
+<section id="non-constant-income-effects" class="slide level2">
+<h2>Non-constant <span class="math inline">\(Income\)</span> effects</h2>
 <ul>
-<li><p>The change in <span class="math inline">\(Score_i\)</span> following small change in <span class="math inline">\(Income_i\)</span> is:</p>
+<li><p>The change in <span class="math inline">\(Score_i\)</span> associated w/ a small change in <span class="math inline">\(Income_i\)</span> is:</p>
 <div class="box">
 <p><span class="math display">\[\lim_{\Delta Income_i \rightarrow 0}\frac{\Delta Score_i}{\Delta Income_i} = \beta_1 + 2 \beta_2 Income_i\]</span></p>
 </div></li>
 <li><p>The effect of <span class="math inline">\(Income\)</span> on <span class="math inline">\(Score\)</span> varies with <span class="math inline">\(Income\)</span> in the polynomial regression model</p></li>
 </ul>
-</section><section id="estimating-the-polynomial-regression-model" class="slide level2">
+</section>
+<section id="estimating-the-polynomial-regression-model" class="slide level2">
 <h2>Estimating the polynomial regression model</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Creating income^2</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a>CASchools<span class="op">$</span>income2 &lt;-<span class="st"> </span>CASchools<span class="op">$</span>income<span class="op">^</span><span class="dv">2</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="co"># Estimate simple linear regression, assign to lm1</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a>lm1 &lt;-<span class="st"> </span><span class="kw">lm</span>(Score <span class="op">~</span><span class="st"> </span>income, <span class="dt">data =</span> CASchools)</span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="kw">parameters</span>(lm1)</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="kw">parameters</span>(lm1, <span class="dt">robust =</span> <span class="ot">TRUE</span>, <span class="dt">vcov_type =</span> <span class="st">&quot;HC1&quot;</span>)</span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="co"># Estimate polynomial regression, assign to lm2</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a>lm2 &lt;-<span class="st"> </span><span class="kw">lm</span>(Score <span class="op">~</span><span class="st"> </span>income <span class="op">+</span><span class="st"> </span>income2, <span class="dt">data =</span> CASchools) </span>
-<span id="cb1-8"><a href="#cb1-8"></a><span class="kw">parameters</span>(lm2)</span></code></pre></div>
-</section><section id="linear-and-polynomial-regression-model-parameters" class="slide level2">
+<span id="cb1-8"><a href="#cb1-8"></a><span class="kw">parameters</span>(lm2, <span class="dt">robust =</span> <span class="ot">TRUE</span>, <span class="dt">vcov_type =</span> <span class="st">&quot;HC1&quot;</span>)</span></code></pre></div>
+</section>
+<section id="linear-and-polynomial-regression-model-parameters" class="slide level2">
 <h2>linear and polynomial regression model parameters</h2>
 <pre><code>## Parameter   | Coefficient |   SE |           95% CI |      t |  df |      p
 ## ---------------------------------------------------------------------------
-## (Intercept) |      625.38 | 1.53 | [622.37, 628.40] | 408.11 | 418 | &lt; .001
-## income      |        1.88 | 0.09 | [  1.70,   2.06] |  20.76 | 418 | &lt; .001</code></pre>
+## (Intercept) |      625.38 | 1.87 | [621.71, 629.06] | 334.81 | 418 | &lt; .001
+## income      |        1.88 | 0.11 | [  1.66,   2.10] |  16.53 | 418 | &lt; .001</code></pre>
 <pre><code>## Parameter   | Coefficient |   SE |           95% CI |      t |  df |      p
 ## ---------------------------------------------------------------------------
-## (Intercept) |      607.30 | 3.05 | [601.31, 613.29] | 199.36 | 417 | &lt; .001
-## income      |        3.85 | 0.30 | [  3.25,   4.45] |  12.66 | 417 | &lt; .001
-## income2     |       -0.04 | 0.01 | [ -0.05,  -0.03] |  -6.76 | 417 | &lt; .001</code></pre>
-</section><section id="test-scores-and-district-income-2" class="slide level2">
+## (Intercept) |      607.30 | 2.90 | [601.60, 613.01] | 209.29 | 417 | &lt; .001
+## income      |        3.85 | 0.27 | [  3.32,   4.38] |  14.36 | 417 | &lt; .001
+## income2     |       -0.04 | 0.00 | [ -0.05,  -0.03] |  -8.85 | 417 | &lt; .001</code></pre>
+</section>
+<section id="test-scores-and-district-income-2" class="slide level2">
 <h2>Test scores and district income</h2>
 <p><img data-src="index_files/figure-revealjs/unnamed-chunk-6-1.png" /><!-- --></p>
-</section></section>
-<section><section id="significance-tests-with-nonlinear-regression-functions" class="title-slide slide level1"><h1>Significance tests with nonlinear regression functions</h1></section><section id="is-the-effect-of-income-statistically-significant" class="slide level2">
-<h2>Is the effect of income statistically significant?</h2>
+</section>
+<section id="test-scores-and-district-income-3" class="slide level2">
+<h2>Test scores and district income</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Define estimated polynomial regression function</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>nonlinregfct &lt;-<span class="st"> </span><span class="cf">function</span>(x){lm2<span class="op">$</span>coefficients[<span class="st">&quot;(Intercept)&quot;</span>] <span class="op">+</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="st">                            </span>lm2<span class="op">$</span>coefficients[<span class="st">&quot;income&quot;</span>]<span class="op">*</span>x <span class="op">+</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="st">                            </span>lm2<span class="op">$</span>coefficients[<span class="st">&quot;income2&quot;</span>]<span class="op">*</span>x<span class="op">^</span><span class="dv">2</span>}</span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co"># Scatter plot of Score against STR</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">plot</span>(CASchools<span class="op">$</span>income,CASchools<span class="op">$</span>Score,</span>
+<span id="cb4-7"><a href="#cb4-7"></a>     <span class="dt">xlab =</span> <span class="st">&quot;District income ($1,000)&quot;</span>, <span class="co"># Label x-axis</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>     <span class="dt">ylab =</span> <span class="st">&quot;Test score&quot;</span>, <span class="co"># Label y-axis</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>     <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="co"># Make the data points blue</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>     <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">60</span>), <span class="co"># Range of x-values in plot</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>     <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">600</span>, <span class="dv">740</span>)) <span class="co"># Range of y-values in plot</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="co"># Add simple linear sample regression function</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="kw">abline</span>(lm1,</span>
+<span id="cb4-14"><a href="#cb4-14"></a>       <span class="dt">lwd =</span> <span class="dv">3</span>,</span>
+<span id="cb4-15"><a href="#cb4-15"></a>       <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="kw">curve</span>(nonlinregfct,</span>
+<span id="cb4-17"><a href="#cb4-17"></a>      <span class="dt">from =</span> <span class="dv">-10</span>, <span class="dt">to =</span> <span class="dv">70</span>, <span class="co"># Evaluate in x values from 5 to 35</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a>      <span class="dt">lwd =</span> <span class="dv">3</span>,</span>
+<span id="cb4-19"><a href="#cb4-19"></a>      <span class="dt">col =</span> <span class="st">&quot;red&quot;</span>,</span>
+<span id="cb4-20"><a href="#cb4-20"></a>      <span class="dt">add =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="co"># Add legends to the plot </span></span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="kw">legend</span>(<span class="st">&quot;bottomright&quot;</span>, <span class="dt">inset =</span> <span class="fl">0.02</span>, </span>
+<span id="cb4-23"><a href="#cb4-23"></a>       <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;Linear&quot;</span>, <span class="st">&quot;Quadratic&quot;</span>),</span>
+<span id="cb4-24"><a href="#cb4-24"></a>       <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;red&quot;</span>), </span>
+<span id="cb4-25"><a href="#cb4-25"></a>       <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">3</span>))</span></code></pre></div>
+</section>
+<section id="test-scores-student-teacher-ratio-and-district-income" class="slide level2">
+<h2>Test scores, student teacher ratio, and district income</h2>
+<p><span class="math display">\[Score_i = 698.93 - 2.28 STR_i + \hat{u}_i\]</span> <img data-src="index_files/figure-revealjs/unnamed-chunk-8-1.png" /><!-- --></p>
+</section>
+<section id="an-interaction-regresssion-function" class="slide level2">
+<h2>An interaction regresssion function</h2>
 <ul>
-<li><p>How do test whether the effect of income is statistically significant in the polynomial regression model?</p>
-<p><span class="math display">\[H_0: \, \beta_1 = \beta_2 = 0; \quad H_1: \, \beta_1 \neq 0 \text{ or } \beta_2 \neq 0\]</span></p></li>
-<li><p>This is a <strong>joint hypothesis</strong>, which we can test by an <span class="math inline">\(F\)</span>-test</p></li>
+<li><p>Consider the interaction regression model</p>
+<div class="box">
+<p><span class="math display">\[\begin{multline}
+Score_i = \beta_0 + \beta_1 STR_i + \beta_2 HigInc_i \\
++ \beta_3 (STR_i \times HigInc_i) + u_i
+\end{multline}\]</span></p>
+</div></li>
+<li><p>The interaction regression model is <strong>linear</strong> in parameters <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, and <span class="math inline">\(\beta_3\)</span>, but <strong>nonlinear</strong> in <span class="math inline">\(Income\)</span></p></li>
 </ul>
-</section><section id="f-test-in-r" class="slide level2">
-<h2><span class="math inline">\(F\)</span>-test in R</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># F-test (heteroskedasticity robust) of H_0: beta_1 = beta_2 = 0</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">linearHypothesis</span>(lm2, <span class="kw">c</span>(<span class="st">&quot;income=0&quot;</span>, <span class="st">&quot;income2=0&quot;</span>), <span class="dt">white.adjust =</span> <span class="st">&quot;hc1&quot;</span>)</span></code></pre></div>
-</section><section id="f-test-in-r-1" class="slide level2">
-<h2><span class="math inline">\(F\)</span>-test in R</h2>
-<pre><code>## Linear hypothesis test
-## 
-## Hypothesis:
-## income = 0
-## income2 = 0
-## 
-## Model 1: restricted model
-## Model 2: Score ~ income + income2
-## 
-## Note: Coefficient covariance matrix supplied.
-## 
-##   Res.Df Df      F    Pr(&gt;F)    
-## 1    419                        
-## 2    417  2 428.52 &lt; 2.2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-</section><section id="is-the-effect-of-income-linear" class="slide level2">
-<h2>Is the effect of income linear?</h2>
+</section>
+<section id="non-constant-str-effect" class="slide level2">
+<h2>Non-constant <span class="math inline">\(STR\)</span> effect</h2>
 <ul>
-<li><p>How do test whether the effect of income is linear in the polynomial regression model?</p>
-<p><span class="math display">\[H_0: \, \beta_2 = 0; \quad H_1: \, \text{ or } \beta_2 \neq 0\]</span></p></li>
-<li><p>This <strong>hypothesis</strong> involves a single restriction, which we can test by an <span class="math inline">\(t\)</span>-test</p></li>
+<li><p>The change in <span class="math inline">\(Score_i\)</span> associated w/ a unit change in <span class="math inline">\(STR_i\)</span> is:</p>
+<div class="box">
+<p><span class="math display">\[\frac{\Delta Score_i}{\Delta STR_i} = \beta_1 + \beta_3 HigInc_i\]</span></p>
+</div></li>
+<li><p>The effect of <span class="math inline">\(STR\)</span> on <span class="math inline">\(Score\)</span> varies with <span class="math inline">\(Income\)</span> in the interaction regression model</p></li>
 </ul>
-</section></section>
+</section>
+<section id="estimating-the-interaction-regression-model" class="slide level2">
+<h2>Estimating the interaction regression model</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Creating a few additional useful variables</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>CASchools<span class="op">$</span>HigInc &lt;-<span class="st"> </span>(CASchools<span class="op">$</span>income <span class="op">&gt;=</span><span class="st"> </span><span class="kw">median</span>(CASchools<span class="op">$</span>income)) <span class="co"># = TRUE if income above median income in sample, = FALSE otherwise</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>CASchools<span class="op">$</span>STR.x.HigInc &lt;-<span class="st"> </span>CASchools<span class="op">$</span>STR <span class="op">*</span><span class="st"> </span>CASchools<span class="op">$</span>HigInc <span class="co"># Interaction</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co"># Estimate simple linear regression Score = b0 + b1*income + u</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>lm3 &lt;-<span class="st"> </span><span class="kw">lm</span>(Score <span class="op">~</span><span class="st"> </span>STR <span class="op">+</span><span class="st"> </span>HigInc <span class="op">+</span><span class="st"> </span>STR.x.HigInc, <span class="dt">data =</span> CASchools) <span class="co"># Assign OLS output to to lm3 list</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="kw">summary</span>(lm3)</span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="kw">parameters</span>(lm3, <span class="dt">robust =</span> <span class="ot">TRUE</span>, <span class="dt">vcov_type =</span> <span class="st">&quot;HC1&quot;</span>)</span></code></pre></div>
+</section>
+<section id="estimating-the-interaction-regression-model-1" class="slide level2">
+<h2>Estimating the interaction regression model</h2>
+<pre><code>## Parameter    | Coefficient |    SE |           95% CI |     t |  df |      p
+## ----------------------------------------------------------------------------
+## (Intercept)  |      663.89 | 10.26 | [643.72, 684.07] | 64.68 | 416 | &lt; .001
+## STR          |       -1.01 |  0.52 | [ -2.04,   0.02] | -1.93 | 416 | 0.055 
+## HigIncTRUE   |       62.53 | 17.24 | [ 28.64,  96.43] |  3.63 | 416 | &lt; .001
+## STR.x.HigInc |       -2.17 |  0.87 | [ -3.89,  -0.46] | -2.50 | 416 | 0.013</code></pre>
+</section>
+<section id="test-scores-student-teacher-ratio-and-district-income-1" class="slide level2">
+<h2>Test scores, student teacher ratio, and district income</h2>
+<p><span class="math display">\[\begin{multline}
+Score_i = 663.89 - 1.01 STR_i + \\
+62.53 HigInc_i-2.17 (STR_i \times HigInc_i)  + \hat{u}_i
+\end{multline}\]</span> <img src="index_files/figure-revealjs/unnamed-chunk-11-1.png" width="70%" /></p>
+</section>
 <section><section id="summary" class="title-slide slide level1"><h1>Summary</h1></section><section id="summary-1" class="slide level2">
 <h2>Summary</h2>
 <ul>
-<li><p>Regression models with nonlinear regression functions allow for the effect of a regressor to be non-constant:</p>
+<li><p>Nonlinear regression functions allow for non-constant effects of the regressor on the dependent variable</p>
 <ul>
-<li><p>Effect can vary with the regressor itself</p></li>
-<li><p>Effect can vary with another regressor</p></li>
+<li><p>Polynomial regression model</p></li>
+<li><p>Interaction regression model</p></li>
 </ul></li>
-<li><p>The polynomial regression model offers a convenient way to introduce nonlinear regression functions where the effect of the regressor varies with the regressor itself</p></li>
-<li><p>This can also be achieved using linear-log, log-linear or log-log models (covered in pre-recorded lecture snippets)</p></li>
-<li><p>Interaction regressions covered in next week’s seminar</p></li>
+<li><p>Failure to capture nonlinear effects may lead the OLS estimator of causal effects to be inconsistent and biased.</p></li>
+<li><p>Possible to test for nonlinear effects.</p></li>
 </ul>
 </section></section>
     </div>
